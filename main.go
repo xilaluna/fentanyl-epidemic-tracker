@@ -127,7 +127,8 @@ func scrape(c *gin.Context) {
 
 func main() {
 	godotenv.Load()
-	url := os.Getenv("TEST")
+	
+	url := os.Getenv("REDIS_URL")
 	fmt.Println(url)
 
 	router := gin.Default()
