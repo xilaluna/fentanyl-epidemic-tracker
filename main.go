@@ -146,9 +146,7 @@ func main() {
 		}
 
 
-		c.JSON(200, gin.H{
-			"message": "scraped",
-		})
+		c.JSON(200, articles)
 	})
 
 	router.Run()
