@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -11,33 +10,47 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-redis/redis/v8"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
 	"github.com/joho/godotenv"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
-type Article struct {
-	Title string `json:"title"`
-	Date string `json:"date"`
-}
-
-var ctx = context.Background()
 
 
 func main() {
 	// Load .env file
 	godotenv.Load()
-	
-	// Connect to Redis
-	url := os.Getenv("REDIS_URL")
-	opt, err := redis.ParseURL(url)
-	if err != nil {
-		panic(err)
-	}
-	rdb := redis.NewClient(opt)
 
 	// Create a gin router
 	router := gin.Default()
+
+	// Connect to MongoDB
+	client, err := mongo.NewClient(options.Client().ApplyURI(os.Getenv("MONGO_URL")))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Connect context
+	ctx := context.Background()
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Disconnect connection when function ends
+	defer client.Disconnect(ctx)
+	
+	// Ping the primary
+	err = client.Ping(ctx, readpref.Primary())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Get a handle for your collection
+	articlesCollection := client.Database("fentanyl-epidemic-data").Collection("articles")
 
 	router.StaticFile("/", "./static/index.html")
 
@@ -47,19 +60,16 @@ func main() {
 		})
 	})
 
-	router.GET("/articles", func(c *gin.Context) {
-		// Get the articles from Redis
-		articles, err := rdb.Get(ctx, "articles").Result()
+	router.GET("/data", func(c *gin.Context) {
+		articles, err := articlesCollection.Find(ctx, bson.M{})
 		if err != nil {
-			panic(err)
+			fmt.Println(err)
 		}
-		c.JSON(200, gin.H{
-			"articles": articles,
-		})
+		
+		c.JSON(200, articles)
 	})
 
 	router.GET("/scrape", func(c *gin.Context) {
-		articles := []Article{}
 		numberOfPages := 1
 
 		// instantiate default collector and set random User-Agent
@@ -99,15 +109,13 @@ func main() {
 				if strings.Contains(strings.ToLower(paragraph.Text), "fentanyl") {
 					title := content.ChildText("header > h1")
 					date := content.ChildText("aside > div > time")
+					link := content.Request.URL.String()
 
-					fmt.Println("Found article:", title, date)
+					fmt.Println("Found article:", title, date, link)
 
-					// add article to articles slice
-					newArticle := Article{}
-					newArticle.Title = title
-					newArticle.Date = date
-					
-					articles = append(articles, newArticle)
+					// Insert article into MongoDB
+					document := bson.D{{Key: "title", Value: title}, {Key: "date", Value: date}}
+					articlesCollection.InsertOne(ctx, document)
 
 					// stop the loop
 					return false
@@ -134,19 +142,10 @@ func main() {
 			}
 		}
 
-		// convert articles to json
-		json, err := json.Marshal(articles)
-		if err != nil {
-			log.Println(err)
-		}
 
-		err = rdb.Set(ctx, "articles", json, 0).Err()
-		if err != nil {
-			fmt.Println(err)
-		}
-
-
-		c.JSON(200, articles)
+		c.JSON(200, gin.H{
+			"message": "scraped",
+		})
 	})
 
 	router.Run()
