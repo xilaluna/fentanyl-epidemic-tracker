@@ -130,9 +130,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	url := os.Getenv("REDIS_URL")
+	url := os.Getenv("TEST")
 	fmt.Println(url)
-	
+
 	router := gin.Default()
 	router.LoadHTMLGlob("templates/*")
 
