@@ -13,7 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
-	"github.com/joho/godotenv"
 )
 type Article struct {
 	Title string `json:"title"`
@@ -126,10 +125,6 @@ func scrape(c *gin.Context) {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	url := os.Getenv("TEST")
 	fmt.Println(url)
 
