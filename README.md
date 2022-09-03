@@ -1,27 +1,28 @@
----
-title: Gin
-description: A Gin server
-tags:
-  - gin
-  - golang
----
+# Fentanyl Epidemic Tracker
 
-# Gin Example
+[![Go Report Card](https://goreportcard.com/badge/github.com/xilaluna/Fentanyl-Epidemic-Tracker)](https://goreportcard.com/report/github.com/xilaluna/Fentanyl-Epidemic-Tracker)
 
-This example starts an [Gin](https://gin-gonic.com/) server.
+The mission for this project was to create a scraper that would pull articles pertaining to fentanyl, for the goal of mapping the trend of the fentanyl epidemic & the increase of fentanyl distrubtion through illegal sites.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new?template=https%3A%2F%2Fgithub.com%2Frailwayapp%2Fexamples%2Ftree%2Fmaster%2Fexamples%2Fgin)
+![graph image](/assets/graph.png)
 
-## ✨ Features
+## How it Works
 
-- Gin
-- Go
+1. How it works is quite simple, there is a simple go scraper built using colly which visits https://darknetlive.com/post/ and its next pages. The scraper then looks into each article and searches all the paragraphs for the word "fentanyl", if the article includes the word it will save the article name and the date it was published.
+2. After the data is pulled it is then put into a json file where chart.js is able to display the amount of articles per month.
 
-## 💁‍♀️ How to use
+![scraper image](/assets/scraper-terminal.png)
 
-- Connect to your Railway project `railway link`
-- Start the development server `railway run go run main.go`
+## Tech Stack
 
-## 📝 Notes
+- [Go](https://go.dev/)
+- [Colly](http://go-colly.org/)
+- [net/http](https://golang.org/pkg/net/http/)
+- [Chart.js](https://www.chartjs.org/)
+- JSON
+- HTML
 
-The server started simply returns a `message: Hello world!` payload in JSON. The server code is located in the `main.go` file.
+## Future Plans
+
+- Store data in a database such as Redis.
+- Create display to show each individual article.
