@@ -13,11 +13,13 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
+	"github.com/joho/godotenv"
 )
 type Article struct {
 	Title string `json:"title"`
 	Date string `json:"date"`
 }
+
 
 func ping(c *gin.Context) {
 	c.JSON(200, gin.H{
@@ -124,8 +126,14 @@ func scrape(c *gin.Context) {
 }
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	url := os.Getenv("REDIS_URL")
+	fmt.Println(url)
+	
 	router := gin.Default()
-
 	router.LoadHTMLGlob("templates/*")
 
 	router.GET("/", index)
