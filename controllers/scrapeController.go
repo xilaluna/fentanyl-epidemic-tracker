@@ -3,7 +3,6 @@ package controllers
 import (
 	"context"
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -11,18 +10,11 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
-	"github.com/gocolly/redisstorage"
-	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 
 func ScrapeController(c *gin.Context)  {
-	godotenv.Load()
-	REDISHOST := os.Getenv("REDISHOST")
-	REDISPORT := os.Getenv("REDISPORT")
-	REDISPASSWORD := os.Getenv("REDISPASSWORD")
-	
 	numberOfPages := 1
 
 	// instantiate default collector and set random User-Agent
@@ -32,25 +24,22 @@ func ScrapeController(c *gin.Context)  {
 	)
 	extensions.RandomUserAgent(collector)
 
-	storage := &redisstorage.Storage{
-		Address:  REDISHOST + ":" + REDISPORT,
-		Password: REDISPASSWORD,
-		DB:       0,
-		Prefix:   "articleCache",
-	}
-
 	// init article collector and set random User-Agent
 	articleCollector := collector.Clone()
 	extensions.RandomUserAgent(articleCollector)
 
-	err := articleCollector.SetStorage(storage)
-	if err != nil {
-		panic(err)
-	}
-
 	// find articles links and vist them with articleCollector
 	collector.OnHTML("main > section > article > a", func(content *colly.HTMLElement) {
+
 		link := content.Request.AbsoluteURL(content.Attr("href"))
+
+		// Check if link is already in database
+		var result bson.M
+		filter := bson.M{"link": link}
+		err := articlesCollection.FindOne(context.Background(), filter).Decode(&result)
+		if err == nil {
+			return
+		}
 		articleCollector.Visit(link)
 	})
 
@@ -69,6 +58,7 @@ func ScrapeController(c *gin.Context)  {
 		title := content.ChildText("header > h1")
 		date := content.ChildText("aside > div > time")
 		link := content.Request.URL.String()
+		found := false
 		
 
 		// loop through all the paragraphs
@@ -79,13 +69,19 @@ func ScrapeController(c *gin.Context)  {
 				fmt.Println("Found article:", title, date, link)
 
 				// Insert article into MongoDB
-				document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}}
+				document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}, {Key: "datapoint", Value: true}}
 				articlesCollection.InsertOne(context.Background(), document)
+				found = true
 				// stop the loop
 				return false
 			}
 			return true
 		})
+
+		if !found {
+			document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}, {Key: "datapoint", Value: false}}
+			articlesCollection.InsertOne(context.Background(), document)
+		}
 	})
 
 	articleCollector.OnRequest(func(request *colly.Request) {
