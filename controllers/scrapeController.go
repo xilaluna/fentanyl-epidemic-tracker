@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -9,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 
@@ -29,6 +31,15 @@ func ScrapeController(c *gin.Context)  {
 	// find articles links and vist them with articleCollector
 	collector.OnHTML("main > section > article > a", func(content *colly.HTMLElement) {
 		link := content.Request.AbsoluteURL(content.Attr("href"))
+
+		// If the link is already in the database, skip it
+		var result bson.M
+		filter := bson.M{"link": link}
+		err := articlesCollection.FindOne(context.Background(), filter).Decode(&result)
+		if err == nil {
+			fmt.Println("Article already in database")
+			return
+		}
 		articleCollector.Visit(link)
 	})
 
@@ -57,8 +68,8 @@ func ScrapeController(c *gin.Context)  {
 				fmt.Println("Found article:", title, date, link)
 
 				// Insert article into MongoDB
-				// document := bson.D{{Key: "title", Value: title}, {Key: "date", Value: date}}
-				//articlesCollection.InsertOne(ctx, document)
+				document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}}
+				articlesCollection.InsertOne(context.Background(), document)
 
 				// stop the loop
 				return false

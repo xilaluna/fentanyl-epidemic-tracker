@@ -13,7 +13,6 @@ func main() {
 	configs.ConnectDB()
 
 	router.StaticFile("/", "./static/index.html")
-
 	routes.ArticlesRoute(router)
 	routes.PingRoute(router)
 	routes.ScrapeRoute(router)

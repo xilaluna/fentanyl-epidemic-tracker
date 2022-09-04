@@ -25,4 +25,5 @@ The mission for this project was to create a scraper that would pull articles pe
 ## Future Plans
 
 - Store data in a database such as Redis.
+- Store every article in the database then check if the link exists already for the collector.
 - Create display to show each individual article.

@@ -9,13 +9,13 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var articleCollection *mongo.Collection = configs.DatabaseCollection(configs.GetClient())
+var articlesCollection *mongo.Collection = configs.DatabaseCollection(configs.GetClient())
 
 func GetArticles(c *gin.Context) {
 	ctx := context.Background()
 	var articles []bson.M
 	
-	cursor, err := articleCollection.Find(ctx, bson.M{})
+	cursor, err := articlesCollection.Find(ctx, bson.M{})
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
