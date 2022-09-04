@@ -14,8 +14,9 @@ var articlesCollection *mongo.Collection = configs.DatabaseCollection(configs.Ge
 func GetArticles(c *gin.Context) {
 	ctx := context.Background()
 	var articles []bson.M
+	filter := bson.M{"datapoint": true}
 	
-	cursor, err := articlesCollection.Find(ctx, bson.M{})
+	cursor, err := articlesCollection.Find(ctx, filter)
 	if err != nil {
 		c.JSON(500, gin.H{"error": err.Error()})
 		return
