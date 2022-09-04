@@ -1,4 +1,4 @@
-# Fentanyl Epidemic Tracker
+# [Fentanyl Epidemic Tracker](https://fentanyl-epidemic-tracker.up.railway.app/)
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/xilaluna/Fentanyl-Epidemic-Tracker)](https://goreportcard.com/report/github.com/xilaluna/Fentanyl-Epidemic-Tracker)
 
