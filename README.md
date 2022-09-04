@@ -22,8 +22,6 @@ The mission for this project was to create a scraper that would pull articles pe
 - [MongoDB](https://www.mongodb.com/)
 - [Railway](https://railway.app/)
 - [Chart.js](https://www.chartjs.org/)
-- JSON
-- HTML
 
 ## Future Plans
 
