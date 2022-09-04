@@ -10,25 +10,49 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/readpref"
 )
 
+var client *mongo.Client
+
 func ConnectDB() *mongo.Client {
+	if client != nil {
+		return client
+	}
+	
 	client, err := mongo.NewClient(options.Client().ApplyURI(LoadEnv()))
 	if err != nil {
 		log.Fatal(err)
 	}
-	ctx := context.Background()
-	err = client.Connect(ctx)
+
+	err = client.Connect(context.Background())
 	if err != nil {
 		log.Fatal(err)
 	}
-	err = client.Ping(ctx, readpref.Primary())
+	
+	err = client.Ping(context.Background(), readpref.Primary())
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("Connected to MongoDB!")
+	fmt.Println("Successfully connected and pinged.")
 	return client
 }
 
-var DB *mongo.Client = ConnectDB()
+func CloseDB() {
+	if client == nil {
+		return
+	}
+	err := client.Disconnect(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println("Connection to MongoDB closed.")
+}
+
+func GetClient() *mongo.Client {
+	if client != nil {
+		return client
+	}
+	return ConnectDB()
+}
+
 
 func DatabaseCollection(client *mongo.Client) *mongo.Collection {
 	collection := client.Database("fentanyl-epidemic-data").Collection("articles")

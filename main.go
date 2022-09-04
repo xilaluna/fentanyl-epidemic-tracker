@@ -18,5 +18,6 @@ func main() {
 	routes.PingRoute(router)
 	routes.ScrapeRoute(router)
 
+	defer configs.CloseDB()
 	router.Run()
 }
