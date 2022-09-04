@@ -37,7 +37,6 @@ func ScrapeController(c *gin.Context)  {
 		filter := bson.M{"link": link}
 		err := articlesCollection.FindOne(context.Background(), filter).Decode(&result)
 		if err == nil {
-			fmt.Println("Article already in database")
 			return
 		}
 		articleCollector.Visit(link)
@@ -55,27 +54,32 @@ func ScrapeController(c *gin.Context)  {
 	})
 
 	articleCollector.OnHTML("main > article", func(content *colly.HTMLElement) {
-		
+		title := content.ChildText("header > h1")
+		date := content.ChildText("aside > div > time")
+		link := content.Request.URL.String()
+		found := false
+
 		// loop through all the paragraphs
 		content.ForEachWithBreak("div > p", func(i int, paragraph *colly.HTMLElement) bool {
 			
 			// check paragraph for the word "fentanyl"
 			if strings.Contains(strings.ToLower(paragraph.Text), "fentanyl") {
-				title := content.ChildText("header > h1")
-				date := content.ChildText("aside > div > time")
-				link := content.Request.URL.String()
-
 				fmt.Println("Found article:", title, date, link)
 
 				// Insert article into MongoDB
-				document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}}
+				document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}, {Key: "datapoint", Value: true}}
 				articlesCollection.InsertOne(context.Background(), document)
-
+				found = true
 				// stop the loop
 				return false
 			}
 			return true
 		})
+
+		if !found {
+			document := bson.D{{Key: "link", Value: link}, {Key: "title", Value: title}, {Key: "date", Value: date}, {Key: "datapoint", Value: false}}
+			articlesCollection.InsertOne(context.Background(), document)
+		}
 	})
 
 	articleCollector.OnRequest(func(request *colly.Request) {
