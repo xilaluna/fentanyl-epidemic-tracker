@@ -18,8 +18,8 @@ The mission for this project was to create a scraper that would pull articles pe
 - [Go](https://go.dev/)
 - [Colly](http://go-colly.org/)
 - [Gin](https://github.com/gin-gonic/gin)
-- [Redis](https://redis.io/)
 - [MongoDB](https://www.mongodb.com/)
+- [Redis](https://redis.io/)
 - [Railway](https://railway.app/)
 - [Chart.js](https://www.chartjs.org/)
 

@@ -5,10 +5,54 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fentanyl Epidemic Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <script src="https://unpkg.com/phosphor-icons"></script>
+    <style type="text/tailwindcss">
+      @layer base {
+        body {
+          @apply bg-zinc-200 text-zinc-900 min-h-screen flex flex-col min-h-screen;
+        }
+      }
+
+      @layer components {
+        .navbar-color {
+          @apply bg-zinc-900 text-zinc-50;
+        }
+      }
+    </style>
   </head>
   <body>
-    <canvas id="myChart" width="300" height="150"></canvas>
+    <header
+      class="py-5 px-5 sticky top-0 flex flex-row justify-between items-center navbar-color"
+    >
+      <h1 class="text-2xl font-bold">Fentanyl Epidemic Tracker</h1>
+      <a href="https://github.com/xilaluna/fentanyl-epidemic-tracker">
+        <i class="ph-github-logo text-2xl"></i>
+      </a>
+    </header>
+    <main
+      class="mx-auto flex max-w-screen-xl flex-col space-y-5 py-5 sm:space-y-10 sm:py-10 px-4 sm:px-0"
+    >
+      <div class="border border-zinc-300 rounded-lg p-2 sm:p-5">
+        <canvas id="myChart"></canvas>
+      </div>
+    </main>
+    <footer
+      class="py-5 px-5 flex flex-row justify-between items-center border-t border-zinc-300 mt-auto"
+    >
+      <p class="text-zinc-400">
+        Developed by
+        <a href="https://xilaluna.com" class="text-zinc-500 hover:underline"
+          >@xilaluna</a
+        >
+      </p>
+      <a
+        href="https://www.buymeacoffee.com/xilaluna"
+        class="text-zinc-500 hover:underline"
+        >Buy Me a coffee ☕️</a
+      >
+    </footer>
     <script>
       async function fetchData() {
         const response = await fetch("/articles")
