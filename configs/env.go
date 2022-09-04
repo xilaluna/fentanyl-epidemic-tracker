@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-func LoadEnv() string{
+func LoadMongoEnv() string{
 	godotenv.Load()
 	return os.Getenv("MONGO_URL")
 }
