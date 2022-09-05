@@ -10,12 +10,31 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gocolly/colly"
 	"github.com/gocolly/colly/extensions"
+	"github.com/xilaluna/fentanyl-epidemic-tracker/configs"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
+
+var websiteCollection *mongo.Collection = configs.DatabaseCollection(configs.GetClient(), "websites")
 
 
 func ScrapeController(c *gin.Context)  {
-	numberOfPages := 1
+	var num int
+	var onPageOne bool
+
+	
+
+	var resultNumber bson.M
+	numberPageFilter := bson.M{"website": "darknetlive.com"}
+	err := websiteCollection.FindOne(context.Background(), numberPageFilter).Decode(&resultNumber)
+	if err != nil {
+		num = 1
+	} else {
+		// convert bson to int
+		num = int(resultNumber["paginationNum"].(int32))
+	}
+
 
 	// instantiate default collector and set random User-Agent
 	collector := colly.NewCollector(
@@ -30,7 +49,6 @@ func ScrapeController(c *gin.Context)  {
 
 	// find articles links and vist them with articleCollector
 	collector.OnHTML("main > section > article > a", func(content *colly.HTMLElement) {
-
 		link := content.Request.AbsoluteURL(content.Attr("href"))
 
 		// Check if link is already in database
@@ -40,15 +58,30 @@ func ScrapeController(c *gin.Context)  {
 		if err == nil {
 			return
 		}
+
 		articleCollector.Visit(link)
 	})
 
 	// find pagination number
 	collector.OnHTML("main > nav > ul > li:last-child > a", func(content *colly.HTMLElement) {
-		if numberOfPages == 1 {
+		if onPageOne {
 			re := regexp.MustCompile("[0-9]+")
 			stringNumber, _ := strconv.Atoi(re.FindAllString(content.Attr("href"), -1)[0])
-			numberOfPages = stringNumber
+			if stringNumber > num {
+				// Update pagination number
+				update := bson.M{"$set": bson.M{"website": "darknetlive.com", "paginationNum": stringNumber}}
+				opts := options.Update().SetUpsert(true)
+				_, err := websiteCollection.UpdateOne(context.Background(), numberPageFilter, update, opts)
+				if err != nil {
+					fmt.Println(err)
+				}
+				onPageOne = false
+				num = stringNumber
+			} else {
+				onPageOne = false
+				num = 1
+				return
+			}
 		} else {
 			return
 		}
@@ -93,8 +126,9 @@ func ScrapeController(c *gin.Context)  {
 	})
 
 	// start scraping
-	for i := 1; i <= numberOfPages; i++ {
+	for i := 1; i <= num; i++ {
 		if i == 1 {
+			onPageOne = true
 			collector.Visit("https://darknetlive.com/post")
 		} else {
 			collector.Visit("https://darknetlive.com/post/page/" + strconv.Itoa(i))

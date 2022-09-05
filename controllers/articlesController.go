@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var articlesCollection *mongo.Collection = configs.DatabaseCollection(configs.GetClient())
+var articlesCollection *mongo.Collection = configs.DatabaseCollection(configs.GetClient(), "articles")
 
 func GetArticles(c *gin.Context) {
 	ctx := context.Background()

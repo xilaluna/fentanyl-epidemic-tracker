@@ -54,7 +54,7 @@ func GetClient() *mongo.Client {
 }
 
 
-func DatabaseCollection(client *mongo.Client) *mongo.Collection {
-	collection := client.Database("fentanyl-epidemic-data").Collection("articles")
+func DatabaseCollection(client *mongo.Client, collectionName string) *mongo.Collection {
+	collection := client.Database("fentanyl-epidemic-data").Collection(collectionName)
 	return collection
 }
