@@ -8,10 +8,23 @@
 
 A Go scraper that is executed by a gin server endpoint that scrapes and crawls through every article on https://darknetlive.com/post/. During this process, articles relating to fentanyl are automatically selected and saved to a Mongo database.
 
+## Usage
+
+You are able to call the gin server endpoint to scrape the website and fetch the articles from the database. The gin server is hosted on Railway and can be accessed at https://fentanyl-epidemic-tracker.xilaluna.com/.
+
+### API Endpoints:
+
+- `/scrape` - Scrapes the website and saves the articles to the database.
+- `/articles` - Fetches the articles from the database.
+- `/ping` - Pings the gin server to check if it is up.
+
 ## How it Works
 
-1. How it works is quite simple, there is a simple go scraper built using colly which visits https://darknetlive.com/post/ and its next pages. The scraper then looks into each article and searches all the paragraphs for the word "fentanyl", if the article includes the word it will save the article name and the date it was published.
-2. After the data is pulled it is then put into a json file where chart.js is able to display the amount of articles per month.
+1. First the gin server is started and the database is connected.
+2. The `/scrape` endpoint is called and checks pagination to see if a new page has been added.
+3. If a new page has been added, the articles are scraped and saved to the database if they contain the keyword "fentanyl".
+4. The `/articles` endpoint is called and the articles are fetched from the database.
+5. The articles are displayed on the website.
 
 ![scraper image](/static/scraper-terminal.png)
 
