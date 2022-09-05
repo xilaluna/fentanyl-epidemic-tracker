@@ -41,6 +41,7 @@ You are able to call the gin server endpoint to scrape the website and fetch the
 ## Future Plans
 
 - Store data in a Redis database.
+- Update the asthetics of the static website.
 - Create display to show each individual article.
 - Create a way to search for specific articles.
 - Speed up scraper.
