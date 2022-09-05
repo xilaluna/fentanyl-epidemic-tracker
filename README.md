@@ -6,7 +6,7 @@
 
 ## About
 
-A Go scraper that is executed by a gin server endpoint that scrapes and crawls through every article on https://darknetlive.com/post/. During this process, articles relating to fentanyl are automatically selected and saved to a Mongo database.
+A Go scraper executed by a gin server endpoint that scrapes and crawls through every article on https://darknetlive.com/post/. During this process, articles relating to fentanyl are automatically selected and saved to a Mongo database.
 
 ## Usage
 
