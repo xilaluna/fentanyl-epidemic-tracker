@@ -3,9 +3,10 @@ package main
 import (
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/xilaluna/fentanyl-epidemic-tracker/configs"
-	"github.com/xilaluna/fentanyl-epidemic-tracker/routes"
+	"github.com/xilaluna/fentanyl-epidemic-tracker/controllers"
 )
 
 
@@ -15,9 +16,17 @@ func main() {
 	configs.ConnectDB()
 
 	router.StaticFile("/", "./static/index.html")
-	routes.ArticlesRoute(router)
-	routes.PingRoute(router)
-	routes.ScrapeRoute(router)
+	router.GET("/articles", controllers.GetArticles)
+	router.GET("/ping", controllers.PingController)
+
+	admin := router.Group("/admin")
+	admin.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"https://example.com"},
+		AllowMethods:     []string{"GET"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+	})).GET("/scrape", controllers.ScrapeController)
 
 	defer configs.CloseDB()
 	router.Run("0.0.0.0:" + os.Getenv("PORT"))
