@@ -2,9 +2,11 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/xilaluna/Fentanyl-Epidemic-Tracker)](https://goreportcard.com/report/github.com/xilaluna/Fentanyl-Epidemic-Tracker)
 
-The mission for this project was to create a scraper that would pull articles pertaining to fentanyl, for the goal of mapping the trend of the fentanyl epidemic & the increase of fentanyl distrubtion through illegal sites.
-
 ![graph image](/static/graph.png)
+
+## About
+
+A Go scraper that is executed by a gin server endpoint that scrapes and crawls through every article on https://darknetlive.com/post/. During this process, articles relating to fentanyl are automatically selected and saved to a Mongo database.
 
 ## How it Works
 
@@ -15,18 +17,17 @@ The mission for this project was to create a scraper that would pull articles pe
 
 ## Tech Stack
 
-- [Go](https://go.dev/)
 - [Colly](http://go-colly.org/)
 - [Gin](https://github.com/gin-gonic/gin)
 - [MongoDB](https://www.mongodb.com/)
-- [Redis](https://redis.io/)
 - [Railway](https://railway.app/)
 - [Chart.js](https://www.chartjs.org/)
+- [Tailwind](https://tailwindcss.com/)
+- [Go](https://go.dev/)
 
 ## Future Plans
 
-- Store data in a database such as Redis.
-- Store every article in the database then check if the link exists already for the collector.
+- Store data in a Redis database.
 - Create display to show each individual article.
 - Create a way to search for specific articles.
 - Speed up scraper.
